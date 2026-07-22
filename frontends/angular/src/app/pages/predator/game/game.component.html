@@ -1,0 +1,179 @@
+<div *ngIf="!(lobby.lobbyGame.active ?? false)" class="m-4">
+    <div class="h1">{{lobby.name}}</div>
+    <div class="h2">Movie: {{lobby.movie}}</div>
+    <div class="h2">Number of players in the lobby: {{lobby.playersNum}}/5</div>
+    <div>
+        <button (click)="startGame()" class="absolute bottom-2 right-2 btn btn-success">Start Game</button>
+    </div>
+</div>
+<div *ngIf="lobby.lobbyGame.active ?? false">
+    <div class="flex justify-between m-4">
+        <div class="h1">{{lobby.name}}</div>
+        <div class="h2">
+            <a target="_blank" href="../../../../assets/rulebook/predator-rulebook.pdf">Rulebook</a>
+        </div>
+    </div>
+    <div class="flex flex-col p-4">
+        <div class="flex justify-between items-center my-2">
+            <div>
+                <div class="flex justify-between">
+                    <div class="flex flex-col" *ngFor="let player of lobby.lobbyGame.players let i = index">
+                        <div class="flex">
+                            <button [disabled]="playerId != lobby.lobbyGame.activePlayer"
+                                (click)="updateWebsocket('Heal ' + i)">
+                                <img [src]="displayPlayer(player)">
+                            </button>
+                            <div class="flex flex-col mx-4">
+                                <div class="font-bold text-red-800">Remaining health - {{player.health}}</div>
+                                <div class="font-bold">Attack points - {{player.curAtt}}</div>
+                                <div class="font-bold">Recruit points - {{player.curRec}}</div>
+                                <div class="font-bold">Free scans - {{player.scan}}</div>
+                                <div class="font-bold">Heals to spare - {{player.heal}}</div>
+                                <div class="font-bold">Minimum heals to spare - {{player.healMin}}</div>
+                                <div class="font-bold">Number of marks - {{player.markNum}}</div>
+                            </div>
+                        </div>
+                        <div *ngIf="lobby.lobbyGame.players.length > 1" class="flex flex-col">
+                            <div class="font-bold" *ngIf="i == playerId">This is you</div>
+                            <div  class="font-bold text-green-800" *ngIf="i == lobby.lobbyGame.activePlayer">Active player</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center font-bold">Players</div>
+            </div>
+        </div>
+        <div class="flex justify-between items-center my-2">
+            <div class="flex flex-col items-center">
+                <img src="{{displayCard(lobby.lobbyGame.objectiveDeck[0])}}">
+                <div class="text-center font-bold">Objectives</div>
+            </div>
+            <button [disabled]="playerId != lobby.lobbyGame.activePlayer || lobby.lobbyGame.hills == null"
+                [ngClass]="{'empty': lobby.lobbyGame.hills === null}" (click)="updateWebsocket('Hills')"
+                class="flex flex-col">
+                <div class="text-center font-bold">Hills</div>
+                <img src="{{displayEnemy(lobby.lobbyGame.hills)}}">
+                <div class="text-center font-bold">Scan cost: 2</div>
+            </button>
+            <button [disabled]="playerId != lobby.lobbyGame.activePlayer || lobby.lobbyGame.ruins == null"
+                [ngClass]="{'empty': lobby.lobbyGame.ruins === null}" (click)="updateWebsocket('Ruins')"
+                class="flex flex-col">
+                <div class="text-center font-bold">Ruins</div>
+                <img src="{{displayEnemy(lobby.lobbyGame.ruins)}}">
+                <div class="text-center font-bold">Scan cost: 2</div>
+            </button>
+            <button [disabled]="playerId != lobby.lobbyGame.activePlayer || lobby.lobbyGame.river == null"
+                [ngClass]="{'empty': lobby.lobbyGame.river === null}" (click)="updateWebsocket('River')"
+                class="flex flex-col">
+                <div class="text-center font-bold">River</div>
+                <img src="{{displayEnemy(lobby.lobbyGame.river)}}">
+                <div class="text-center font-bold">Scan cost: 3</div>
+            </button>
+            <button [disabled]="playerId != lobby.lobbyGame.activePlayer || lobby.lobbyGame.graveyard == null"
+                [ngClass]="{'empty': lobby.lobbyGame.graveyard === null}" (click)="updateWebsocket('Graveyard')"
+                class="flex flex-col">
+                <div class="text-center font-bold">Graveyard</div>
+                <img src="{{displayEnemy(lobby.lobbyGame.graveyard)}}">
+                <div class="text-center font-bold">Scan cost: 3</div>
+            </button>
+            <button [disabled]="playerId != lobby.lobbyGame.activePlayer || lobby.lobbyGame.underground == null"
+                [ngClass]="{'empty': lobby.lobbyGame.underground === null}" (click)="updateWebsocket('Underground')"
+                class="flex flex-col">
+                <div class="text-center font-bold">Underground</div>
+                <img src="{{displayEnemy(lobby.lobbyGame.underground)}}">
+                <div class="text-center font-bold">Scan cost: 4</div>
+            </button>
+            <div class="flex flex-col">
+                <img [src]="portraitPath">
+                <div class="text-center font-bold">Enemies</div>
+            </div>
+        </div>
+        <div class="flex justify-between items-center my-2">
+            <div class="flex flex-col items-center">
+                <img class="location" src="{{displayCard(lobby.lobbyGame.location)}}">
+                <div class="text-center font-bold">Location</div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center">
+                    <div *ngFor="let enemy of lobby.lobbyGame.combatEnemies let i = index">
+                        <button [disabled]="playerId != lobby.lobbyGame.activePlayer"
+                            (click)="updateWebsocket('CombatZone ' + i)">
+                            <img [src]="displayCard(enemy)">
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center font-bold">Combat Zone</div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center">
+                    <div *ngFor="let enemy of lobby.lobbyGame.operations let i = index">
+                        <button [disabled]="playerId != lobby.lobbyGame.activePlayer"
+                            (click)="updateWebsocket('Operations ' + i)">
+                            <img [src]="displayCard(enemy)">
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center font-bold">Operations</div>
+            </div>
+            <div class="flex flex-col">
+                <img [src]="portraitPath">
+                <div class="text-center font-bold">Strikes</div>
+            </div>
+        </div>
+        <div class="flex justify-between items-center my-2">
+            <button [disabled]="playerId != lobby.lobbyGame.activePlayer"
+                *ngIf="lobby.lobbyGame.commanderDeck.length > 0" class="flex flex-col"
+                (click)="updateWebsocket('Commander')">
+                <img [src]="portraitPath">
+                <div class="text-center font-bold">Commanders - {{lobby.lobbyGame.commanderDeck.length}}</div>
+            </button>
+            <div>
+                <div class="flex justify-between items-center">
+                    <div *ngFor="let playable of lobby.lobbyGame.barrack let i = index">
+                        <button [disabled]="playerId != lobby.lobbyGame.activePlayer"
+                            (click)="updateWebsocket('Barrack ' + i)">
+                            <img [src]="displayCard(playable)">
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center font-bold">Barrack</div>
+            </div>
+            <div *ngIf="lobby.lobbyGame.hqDeck.length > 0" class="flex flex-col">
+                <img [src]="portraitPath">
+                <div class="text-center font-bold">HQ</div>
+            </div>
+        </div>
+        <div class="flex justify-between items-center my-2">
+            <div>
+                <div class="flex justify-between items-center">
+                    <div *ngFor="let playable of lobby.lobbyGame.players[playerId].hand let i = index">
+                        <button [disabled]="disableCard(playable)" (click)="updateWebsocket('Hand ' + i)">
+                            <img [src]="displayCard(playable)">
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center font-bold">Hand</div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center">
+                    <div *ngFor="let playable of lobby.lobbyGame.players[playerId].activeCards let i = index">
+                        <button [disabled]="playerId != lobby.lobbyGame.activePlayer"
+                            (click)="updateWebsocket('Activate ' + i)">
+                            <img [src]="displayCard(playable)">
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center font-bold">Played cards</div>
+            </div>
+        </div>
+    </div>
+    <div class="flex float-right mb-4">
+
+        <div class="mx-2">
+            <button [disabled]="playerId != lobby.lobbyGame.activePlayer" (click)="endTurn()" class="btn btn-info">End
+                turn</button>
+        </div>
+        <div class="mx-2">
+            <button (click)="endGame()" class="btn btn-danger">End Game</button>
+        </div>
+    </div>
+</div>

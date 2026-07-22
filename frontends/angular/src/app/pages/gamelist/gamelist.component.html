@@ -1,0 +1,19 @@
+<div class="h1 mt-4">Games available to play:</div>
+<div *ngFor="let item of availableGames">
+    <div class="flex my-4">
+        <div class="flex flex-col mr-8 min-w-max">
+            <a routerLink="../predator">
+                <img class="w-96" [src]="item.imgUrl">
+                <div class="text-black font-bold">{{item.name}}</div>
+            </a>
+        </div>
+        <div class="flex flex-col relative">
+            <div class="text-justify">{{item.description}}</div>
+            <div class="flex">
+                <div class="absolute left-0 bottom-0"><strong>Number of players: </strong>{{item.playerNum}}</div>
+                <div class="absolute right-0 bottom-0"><strong>Average game time: </strong>{{item.averageTime}}</div>
+            </div>
+        </div>
+    </div>
+    <hr>
+</div>

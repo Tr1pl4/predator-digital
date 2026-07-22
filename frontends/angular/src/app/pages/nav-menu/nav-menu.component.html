@@ -1,0 +1,22 @@
+<header class="flex justify-between shadow-md px-8">
+  <div class="text-xl my-4">
+    <a [routerLink]="['./']">Home</a>
+  </div>
+  <div class="flex justify-evenly">
+    <div class="text-xl ml-8 m-4">
+      <a routerLinkActive="underline" [routerLink]="['./gamelist']">Games</a>
+    </div>
+    <div class="flex justify-evenly items-center text-xl" *ngIf="!isLoggedIn">
+      <a routerLinkActive="underline" [routerLink]="['./auth/login']">Login</a>/
+      <a routerLinkActive="underline" [routerLink]="['./auth/registration']">Register</a>
+    </div>
+    <div class="flex flex-col items-center" *ngIf="isLoggedIn">
+      <div class="text-xl mx-4 mt-4">
+        <div>Welcome back {{currentUserName}}!</div>
+      </div>
+      <div>
+        <button [routerLink]="['./auth/login']" (click)="onLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</header>
