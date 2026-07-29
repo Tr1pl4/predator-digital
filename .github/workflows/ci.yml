@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      dotnet: ${{ steps.filter.outputs.dotnet }}
+      angular: ${{ steps.filter.outputs.angular }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Filter jobs based on changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            dotnet:
+              - 'backends/dotnet-webapi/**'
+            angular:
+              - 'frontends/angular/**'
+            workflow:
+              - '.github/workflows/**'
+
+  dotnet:
+    name: Backend (.NET)
+    needs: changes
+    if: |
+      needs.changes.outputs.dotnet == 'true' ||
+      needs.changes.outputs.workflow == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backends/dotnet-webapi
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '5.0.x'
+          cache: true
+          cache-dependency-path: backends/dotnet-webapi/**/*.csproj
+
+      - name: Restore project
+        run: dotnet restore PredatorDigital.Api.sln
+
+      - name: Build
+        run: dotnet build PredatorDigital.Api.sln --configuration Release --no-restore
+
+  angular:
+    name: Frontend (Angular)
+    needs: changes
+    if: |
+      needs.changes.outputs.angular == 'true' ||
+      needs.changes.outputs.workflow == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontends/angular
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontends/angular/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build -- --configuration production
