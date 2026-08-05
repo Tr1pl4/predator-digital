@@ -1,0 +1,13 @@
+<header class="shell-header">
+  <a routerLink="/" class="brand">BG Colosseum</a>
+  <nav class="shell-nav">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+    <a routerLink="/gamelist" routerLinkActive="active">Games</a>
+    <a routerLink="/predator" routerLinkActive="active">Predator</a>
+    <a routerLink="/auth/login" routerLinkActive="active">Login</a>
+  </nav>
+</header>
+
+<main class="shell-main">
+  <router-outlet />
+</main>

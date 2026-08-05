@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: inherit;
+}
+
+.shell-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.shell-nav a {
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.shell-nav a.active {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.shell-main {
+  padding: 1.25rem;
+}
